@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parent Login | Fleet System</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-500 to-purple-600 h-screen flex items-center justify-center">
+  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">🚍 Parent Login</h2>
+    
+    <input id="studentUID" type="text" placeholder="Enter Student UID" class="w-full mb-3 p-2 border rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-400">
+    <input id="studentName" type="text" placeholder="Enter Student Name" class="w-full mb-3 p-2 border rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+    <button id="loginBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-md font-semibold transition">Login</button>
+
+    <p class="text-sm text-gray-500 mt-4">Stay logged in automatically next time!</p>
+  </div>
+
+  <script>
+    document.getElementById("loginBtn").addEventListener("click", () => {
+      const uid = document.getElementById("studentUID").value.trim();
+      const name = document.getElementById("studentName").value.trim();
+      if (!uid || !name) return alert("Please enter both fields!");
+
+      // Save in local storage (auto-login)
+      localStorage.setItem("studentUID", uid);
+      localStorage.setItem("studentName", name);
+
+      window.location.href = "dashboard.html";
+    });
+
+    // Auto redirect if already logged in
+    if (localStorage.getItem("studentUID")) {
+      window.location.href = "dashboard.html";
+    }
+  </script>
+</body>
+</html>
