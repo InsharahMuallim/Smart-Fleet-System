@@ -1,5 +1,6 @@
+// firebase-config.js
 const firebaseConfig = {
-  apiKey: "AIzaSyEXAMPLE",
+  apiKey: "AIzaSyCWZ4fsdFQmhuzwBPRDhyBuMpRj9gmk8g4",
   authDomain: "smart-fleet-management-s-832af.firebaseapp.com",
   databaseURL: "https://smart-fleet-management-s-832af-default-rtdb.firebaseio.com",
   projectId: "smart-fleet-management-s-832af",
@@ -7,3 +8,7 @@ const firebaseConfig = {
   messagingSenderId: "245808193086",
   appId: "1:245808193086:web:ea1cf8098219bb9ac4bb6f"
 };
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
