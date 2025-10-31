@@ -3,36 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Parent Login | Fleet System</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <title>Parent Login Portal | Smart Fleet System</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
 </head>
-<body class="bg-gradient-to-br from-blue-500 to-purple-600 h-screen flex items-center justify-center">
-  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">🚍 Parent Login</h2>
-    
-    <input id="studentUID" type="text" placeholder="Enter Student UID" class="w-full mb-3 p-2 border rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-400">
-    <input id="studentName" type="text" placeholder="Enter Student Name" class="w-full mb-3 p-2 border rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-    <button id="loginBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-md font-semibold transition">Login</button>
-
-    <p class="text-sm text-gray-500 mt-4">Stay logged in automatically next time!</p>
+<body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
+  <div class="bg-white shadow-lg rounded-2xl p-8 w-96 text-center">
+    <h1 class="text-2xl font-bold mb-4">🚍 Parent Login Portal</h1>
+    <input id="studentId" type="text" placeholder="Enter Student UID"
+      class="w-full p-2 border rounded mb-4" />
+    <button onclick="login()"
+      class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">
+      Track My Child
+    </button>
   </div>
 
+  <!-- Firebase SDKs (Browser compatible) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+
+  <!-- Your Scripts -->
+  <script src="firebase-config.js"></script>
+  <script src="script.js"></script>
+
   <script>
-    document.getElementById("loginBtn").addEventListener("click", () => {
-      const uid = document.getElementById("studentUID").value.trim();
-      const name = document.getElementById("studentName").value.trim();
-      if (!uid || !name) return alert("Please enter both fields!");
-
-      // Save in local storage (auto-login)
-      localStorage.setItem("studentUID", uid);
-      localStorage.setItem("studentName", name);
-
-      window.location.href = "dashboard.html";
-    });
-
-    // Auto redirect if already logged in
-    if (localStorage.getItem("studentUID")) {
+    function login() {
+      const id = document.getElementById('studentId').value.trim();
+      if (!id) { alert('Please enter Student UID'); return; }
+      localStorage.setItem('studentUID', id);
       window.location.href = "dashboard.html";
     }
   </script>
