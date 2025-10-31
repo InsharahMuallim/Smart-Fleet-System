@@ -1,67 +1,44 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+console.log("✅ script.js loaded");
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+// Initialize Realtime DB
+const db = firebase.database();
 
-const studentUID = localStorage.getItem("studentUID");
-const studentName = localStorage.getItem("studentName");
+// Map init (for dashboard)
+if (document.getElementById('map')) {
+  const map = L.map('map').setView([13.997, 74.525], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+  let marker;
 
-if (!studentUID) {
-  window.location.href = "index.html";
-}
-
-document.getElementById("studentName").textContent = studentName;
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.clear();
-  window.location.href = "index.html";
-};
-
-// Ask notification permission
-if (Notification.permission !== "granted") {
-  Notification.requestPermission();
-}
-
-const tableBody = document.getElementById("activityTable");
-const statusEl = document.getElementById("status");
-const locationEl = document.getElementById("location");
-const busEl = document.getElementById("busInfo");
-
-const logRef = ref(db, "fleet_events/rfid_logs");
-
-let lastStatus = "";
-
-onValue(logRef, (snapshot) => {
-  const data = snapshot.val();
-  if (!data) return;
-
-  const logs = Object.values(data).filter(d => d.uid === studentUID);
-  if (logs.length === 0) return;
-
-  const latest = logs[logs.length - 1];
-
-  busEl.textContent = latest.bus || "Bus 101";
-  statusEl.textContent = latest.status;
-  locationEl.textContent = latest.location;
-
-  // Table display
-  tableBody.innerHTML = "";
-  logs.slice(-10).reverse().forEach(log => {
-    const row = `<tr class="border-b">
-      <td class="p-2">${new Date(log.timestamp).toLocaleString()}</td>
-      <td class="p-2">${log.status}</td>
-      <td class="p-2">${log.location}</td>
-    </tr>`;
-    tableBody.innerHTML += row;
+  // Show bus position
+  db.ref('/fleet_status/Bus_101').on('value', snap => {
+    const d = snap.val();
+    if (!d) return;
+    if (marker) map.removeLayer(marker);
+    marker = L.marker([d.latitude, d.longitude]).addTo(map)
+      .bindPopup(`🚌 Bus 101<br>Speed: ${d.speed_kmph} km/h`).openPopup();
   });
 
-  // Send notification if status changes
-  if (latest.status !== lastStatus) {
-    new Notification(`${studentName} ${latest.status} the bus!`, {
-      body: `Bus: ${latest.bus}\nLocation: ${latest.location}`,
-      icon: "https://cdn-icons-png.flaticon.com/512/1048/1048313.png"
-    });
-    lastStatus = latest.status;
-  }
-});
-
+  // Show student logs
+  const table = document.getElementById('logTable');
+  const uid = localStorage.getItem('studentUID');
+  db.ref('/fleet_events/rfid_logs').on('value', snap => {
+    const data = snap.val();
+    table.innerHTML = '';
+    if (!data) return;
+    Object.values(data)
+      .filter(e => !uid || e.passenger_uid === uid)
+      .reverse()
+      .slice(0, 10)
+      .forEach(e => {
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          `<td class="border p-2">${e.passenger_uid}</td>
+           <td class="border p-2">${e.action}</td>
+           <td class="border p-2">${e.lat?.toFixed(4)}, ${e.lng?.toFixed(4)}</td>
+           <td class="border p-2">${e.timestamp}</td>`;
+        table.appendChild(tr);
+      });
+  });
+}
