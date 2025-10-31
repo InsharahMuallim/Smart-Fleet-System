@@ -18,19 +18,74 @@
     <h2 class="text-xl font-bold mb-2">Student Activity Logs</h2>
     <table class="w-full text-left border">
       <thead class="bg-gray-200">
-        <tr><th class="p-2">UID</th><th class="p-2">Status</th><th class="p-2">Location</th><th class="p-2">Time</th></tr>
+        <tr>
+          <th class="p-2">UID</th>
+          <th class="p-2">Status</th>
+          <th class="p-2">Location</th>
+          <th class="p-2">Time</th>
+        </tr>
       </thead>
       <tbody id="logTable"></tbody>
     </table>
   </div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  <!-- Your Scripts -->
-  <script src="firebase-config.js"></script>
-  <script src="script.js"></script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCWZ4fsdFQmhuzwBPRDhyBuMpRj9gmk8g4",
+      authDomain: "smart-fleet-management-s-832af.firebaseapp.com",
+      databaseURL: "https://smart-fleet-management-s-832af-default-rtdb.firebaseio.com",
+      projectId: "smart-fleet-management-s-832af",
+      storageBucket: "smart-fleet-management-s-832af.appspot.com",
+      messagingSenderId: "1081234567890",
+      appId: "1:1081234567890:web:abcdef123456"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    console.log("✅ Firebase connected (module mode)");
+
+    // Map setup
+    const map = L.map('map').setView([13.997, 74.525], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+    let marker;
+
+    // Bus live location
+    const busRef = ref(db, '/fleet_status/Bus_101');
+    onValue(busRef, snap => {
+      const d = snap.val();
+      if (!d) return;
+      if (marker) map.removeLayer(marker);
+      marker = L.marker([d.latitude, d.longitude]).addTo(map)
+        .bindPopup(`🚌 Bus 101<br>Speed: ${d.speed_kmph} km/h`).openPopup();
+    });
+
+    // Student logs
+    const uid = localStorage.getItem('studentUID');
+    const logTable = document.getElementById('logTable');
+    const logsRef = ref(db, '/fleet_events/rfid_logs');
+    onValue(logsRef, snap => {
+      const data = snap.val();
+      logTable.innerHTML = '';
+      if (!data) return;
+      Object.values(data)
+        .filter(e => !uid || e.passenger_uid === uid)
+        .reverse()
+        .slice(0, 10)
+        .forEach(e => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="border p-2">${e.passenger_uid}</td>
+            <td class="border p-2">${e.action}</td>
+            <td class="border p-2">${e.lat?.toFixed(4)}, ${e.lng?.toFixed(4)}</td>
+            <td class="border p-2">${e.timestamp}</td>`;
+          logTable.appendChild(tr);
+        });
+    });
+  </script>
 </body>
 </html>
