@@ -1,44 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fleet Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
-  <script src="firebase-config.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Smart Fleet System</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body class="bg-gray-100">
-  <div class="p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">👨‍👩‍👧 Parent Dashboard</h2>
-      <button id="logoutBtn" class="text-red-600 hover:underline">Logout</button>
-    </div>
+  <div class="p-4 bg-blue-600 text-white text-center font-bold text-xl">
+    🚌 Smart Fleet System – Live Bus Tracking
+  </div>
 
-    <div class="bg-white rounded-xl shadow-lg p-4 mb-4">
-      <h3 class="text-lg font-semibold mb-2">🚍 Bus & Student Info</h3>
-      <p><strong>Student:</strong> <span id="studentName"></span></p>
-      <p><strong>Bus:</strong> <span id="busInfo"></span></p>
-      <p><strong>Status:</strong> <span id="status" class="font-semibold text-blue-700"></span></p>
-      <p><strong>Location:</strong> <span id="location"></span></p>
-    </div>
-
-    <div id="map" class="h-80 rounded-xl shadow-lg mb-4"></div>
-
-    <h3 class="text-lg font-semibold mb-2">📜 Recent Activity</h3>
-    <table class="w-full bg-white shadow-lg rounded-xl">
-      <thead class="bg-blue-100">
-        <tr>
-          <th class="p-2">Time</th>
-          <th class="p-2">Status</th>
-          <th class="p-2">Location</th>
-        </tr>
+  <div id="map" class="h-80 m-4 rounded-lg shadow"></div>
+  <div class="m-4 p-4 bg-white rounded-lg shadow">
+    <h2 class="text-xl font-bold mb-2">Student Activity Logs</h2>
+    <table class="w-full text-left border">
+      <thead class="bg-gray-200">
+        <tr><th class="p-2">UID</th><th class="p-2">Status</th><th class="p-2">Location</th><th class="p-2">Time</th></tr>
       </thead>
-      <tbody id="activityTable"></tbody>
+      <tbody id="logTable"></tbody>
     </table>
   </div>
 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+
+  <!-- Your Scripts -->
+  <script src="firebase-config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
