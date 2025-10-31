@@ -11,28 +11,23 @@
     <h1 class="text-2xl font-bold mb-4">🚍 Parent Login Portal</h1>
     <input id="studentId" type="text" placeholder="Enter Student UID"
       class="w-full p-2 border rounded mb-4" />
-    <button onclick="login()"
+    <button id="loginBtn"
       class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">
       Track My Child
     </button>
   </div>
 
-  <!-- Firebase SDKs (Browser compatible) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <!-- Use ES modules -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
-  <!-- Your Scripts -->
-  <script src="firebase-config.js"></script>
-  <script src="script.js"></script>
-
-  <script>
-    function login() {
+    // Temporary fix for GitHub Pages (no backend)
+    document.getElementById('loginBtn').addEventListener('click', () => {
       const id = document.getElementById('studentId').value.trim();
-      if (!id) { alert('Please enter Student UID'); return; }
+      if (!id) return alert('Please enter Student UID');
       localStorage.setItem('studentUID', id);
       window.location.href = "dashboard.html";
-    }
+    });
   </script>
 </body>
 </html>
