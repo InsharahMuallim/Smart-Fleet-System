@@ -3,89 +3,93 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard | Smart Fleet System</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <title>Live Bus Tracking | Smart Fleet System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f9fafb;
+      color: #111827;
+    }
+    header {
+      background: #2563eb;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    #map {
+      height: 80vh;
+      width: 100%;
+    }
+    #info {
+      text-align: center;
+      padding: 10px;
+      font-size: 1.1rem;
+    }
+  </style>
 </head>
-<body class="bg-gray-100">
-  <div class="p-4 bg-blue-600 text-white text-center font-bold text-xl">
-    🚌 Smart Fleet System – Live Bus Tracking
-  </div>
+<body>
+  <header>🚌 Live Bus Tracking</header>
 
-  <div id="map" class="h-80 m-4 rounded-lg shadow"></div>
-  <div class="m-4 p-4 bg-white rounded-lg shadow">
-    <h2 class="text-xl font-bold mb-2">Student Activity Logs</h2>
-    <table class="w-full text-left border">
-      <thead class="bg-gray-200">
-        <tr>
-          <th class="p-2">UID</th>
-          <th class="p-2">Status</th>
-          <th class="p-2">Location</th>
-          <th class="p-2">Time</th>
-        </tr>
-      </thead>
-      <tbody id="logTable"></tbody>
-    </table>
-  </div>
+  <div id="info">Fetching live GPS data...</div>
+  <div id="map"></div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  <!-- ✅ Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
+  <script>
+    // 🔥 Your Firebase Config
     const firebaseConfig = {
-      apiKey: "AIzaSyCWZ4fsdFQmhuzwBPRDhyBuMpRj9gmk8g4",
+      apiKey: "AIzaSyCfPmCvSy6Fx-7j56elBkWnVygAZTxMVwo",
       authDomain: "smart-fleet-management-s-832af.firebaseapp.com",
       databaseURL: "https://smart-fleet-management-s-832af-default-rtdb.firebaseio.com",
       projectId: "smart-fleet-management-s-832af",
       storageBucket: "smart-fleet-management-s-832af.appspot.com",
-      messagingSenderId: "1081234567890",
-      appId: "1:1081234567890:web:abcdef123456"
+      messagingSenderId: "712345678901",
+      appId: "1:712345678901:web:abcdef123456"
     };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    console.log("✅ Firebase connected (module mode)");
+    let map, marker;
 
-    // Map setup
-    const map = L.map('map').setView([13.997, 74.525], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-    let marker;
+    function initMap() {
+      const defaultLoc = { lat: 12.9716, lng: 77.5946 }; // Bengaluru
+      map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 14,
+        center: defaultLoc,
+      });
+      marker = new google.maps.Marker({
+        position: defaultLoc,
+        map: map,
+        title: "Bus Location",
+      });
 
-    // Bus live location
-    const busRef = ref(db, '/fleet_status/Bus_101');
-    onValue(busRef, snap => {
-      const d = snap.val();
-      if (!d) return;
-      if (marker) map.removeLayer(marker);
-      marker = L.marker([d.latitude, d.longitude]).addTo(map)
-        .bindPopup(`🚌 Bus 101<br>Speed: ${d.speed_kmph} km/h`).openPopup();
-    });
+      const infoDiv = document.getElementById("info");
 
-    // Student logs
-    const uid = localStorage.getItem('studentUID');
-    const logTable = document.getElementById('logTable');
-    const logsRef = ref(db, '/fleet_events/rfid_logs');
-    onValue(logsRef, snap => {
-      const data = snap.val();
-      logTable.innerHTML = '';
-      if (!data) return;
-      Object.values(data)
-        .filter(e => !uid || e.passenger_uid === uid)
-        .reverse()
-        .slice(0, 10)
-        .forEach(e => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="border p-2">${e.passenger_uid}</td>
-            <td class="border p-2">${e.action}</td>
-            <td class="border p-2">${e.lat?.toFixed(4)}, ${e.lng?.toFixed(4)}</td>
-            <td class="border p-2">${e.timestamp}</td>`;
-          logTable.appendChild(tr);
-        });
-    });
+      // 👇 Listen to Firebase updates
+      db.ref("gps/BUS-001").on("value", (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.latitude && data.longitude) {
+          const lat = parseFloat(data.latitude);
+          const lng = parseFloat(data.longitude);
+          const speed = data.speed || "N/A";
+          const loc = { lat, lng };
+
+          marker.setPosition(loc);
+          map.setCenter(loc);
+          infoDiv.innerHTML = `Bus BUS-001 → 📍 Lat: ${lat.toFixed(5)} | Lng: ${lng.toFixed(5)} | Speed: ${speed} km/h`;
+        } else {
+          infoDiv.innerHTML = "Waiting for GPS data...";
+        }
+      });
+    }
   </script>
+
+  <!-- ✅ Google Maps API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCfPmCvSy6Fx-7j56elBkWnVygAZTxMVwo&callback=initMap" async defer></script>
 </body>
 </html>
